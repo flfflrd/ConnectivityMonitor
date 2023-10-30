@@ -1,0 +1,34 @@
+#!/bin/sh
+
+getTime () {
+	float=$(ping $1 -c 1 | grep from | awk -F ' ' '{print $7}' | sed 's/time=//')
+	echo ${float%.*}
+}
+
+count=0
+while true; do
+	count=$((count+1))
+
+	dns_time=$(getTime 1.1.1.1)
+	gateway_time=$(getTime 192.168.1.1)
+
+	dns_total=$(( dns_total+dns_time ))
+	gateway_total=$(( gateway_total+gateway_time))
+
+	dns_average=$(( dns_total / count ))
+	gateway_average=$(( gateway_total / count ))
+
+	output=
+	printf "GATEWAY:\t$gateway_time,\t$gateway_average\n"
+	printf "\e[0KDNS:\t\t$dns_time,\t$dns_average\n"
+	sleep 1
+	printf "\e[2A"
+#	printf "\r%b" "\033[2K"
+done
+
+# Separate ping outputs into variables | DONE
+# Rewrite prior output | DONE, flickering a little tho
+# Check for connectivity failures
+#  - might have to do some math to determine outliers
+# Log discrepancies to a file for future review.
+
